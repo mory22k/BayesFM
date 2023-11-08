@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 class FactorizationMachines:
     """
@@ -50,9 +49,10 @@ class FactorizationMachines:
         )
         return (bias + linear + interaction).flatten()
 
-def ALS_FM(model: FactorizationMachines, X_data: np.ndarray, Y_data: np.ndarray,
-           max_iter: int = 100, use_true_error: bool = False,
-           lamb_b = 0., lamb_w = 0., lamb_v = 0.
+def als(
+    model: FactorizationMachines, X_data: np.ndarray, Y_data: np.ndarray,
+    max_iter: int = 100, use_true_error: bool = False,
+    lamb_b = 0., lamb_w = 0., lamb_v = 0.
 ) -> np.ndarray:
     """
     Fast Alternating Least Squares (ALS) algorithm for training a Factorization Machines model.
@@ -124,27 +124,10 @@ def ALS_FM(model: FactorizationMachines, X_data: np.ndarray, Y_data: np.ndarray,
 
         if use_true_error:
             error = Y_data - model.predict(X_data)
-            error_hist[iter] = (np.mean(error**2))
+            error_hist[iter+1] = (np.mean(error**2))
         else:
-            error_hist[iter] = (np.mean(error**2))
+            error_hist[iter+1] = (np.mean(error**2))
 
         print(f"iter: {iter}, error: {error_hist[iter]}")
 
     return error_hist
-
-
-D = 100
-N = 10
-K = 5
-
-model = FactorizationMachines(n_features=N, n_factors=K)
-X_data = np.random.choice([0, 1], size=(D,N))
-Y_data = np.random.randn(D)
-
-MSE_hist = ALS_FM(model, X_data, Y_data, 1000, use_true_error=False)
-
-plt.plot(MSE_hist)
-plt.xlabel("Iteration")
-plt.ylabel("MSE")
-plt.yscale("log")
-plt.savefig("ALS-FM.png", dpi=300, bbox_inches="tight")
