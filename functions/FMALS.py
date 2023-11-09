@@ -26,7 +26,7 @@ class FactorizationMachines:
         self.rng = np.random.default_rng(seed)
         self.b = 0.
         self.w = np.zeros(n_features)
-        self.V = self.rng.normal(0, init_sigma, size=(n_features, n_factors))
+        self.V = self.rng.normal(0, init_sigma**2, size=(n_features, n_factors))
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
