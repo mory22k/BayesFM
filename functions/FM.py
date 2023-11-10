@@ -49,7 +49,7 @@ class FactorizationMachines:
         )
         return (bias + linear + interaction).flatten()
 
-def als(
+def train_als(
     model: FactorizationMachines, X_data: np.ndarray, Y_data: np.ndarray,
     max_iter: int = 100, use_true_error: bool = False,
     lamb_b = 0., lamb_w = 0., lamb_v = 0.
@@ -68,7 +68,7 @@ def als(
         lamb_v (float): The regularization parameter for the factor matrix V. Default is 0.
 
     Returns:
-        np.ndarray: The error history of the ALS algorithm, of shape (max_iter + 1,).
+        np.ndarray(max_iter + 1,): The error history of the algorithm.
 
     References:
         S. Rendle, Z. Gantner, C. Freudenthaler, and L. Schmidt-Thieme.
@@ -116,6 +116,99 @@ def als(
                 # G = X_data[:, n] * np.sum(model.V[:, k] * X_data, axis=1) - model.V[n, k] * X_data[:, n] ** 2
                 G = X_data[:, n] * V_X[:, k] - model.V[n, k] * X_squared[:, n]
                 delta_param = G.T @ error / (G.T @ G + lamb_v)
+                delta_V_X_k = delta_param * X_data[:, n]
+                delta_error = -delta_param * G
+                model.V[n, k] += delta_param
+                V_X[:, k] += delta_V_X_k
+                error += delta_error
+
+        if use_true_error:
+            error = Y_data - model.predict(X_data)
+            error_hist[iter+1] = (np.mean(error**2))
+        else:
+            error_hist[iter+1] = (np.mean(error**2))
+
+        if error_hist[iter+1] == 0:
+            break
+
+        print(f"iter: {iter}, error: {error_hist[iter]}")
+
+    return error_hist
+
+def train_bayes(
+    model: FactorizationMachines, X_data: np.ndarray, Y_data: np.ndarray,
+    max_iter: int = 100, use_true_error: bool = False,
+    lamb_b = 0., lamb_w = 0., lamb_v = 0.,
+    var_y = 1., seed = None,
+) -> np.ndarray:
+    """
+    Bayesian training of the Factorization Machines model with normal prior and normal likelihood.
+
+    Args:
+        model (FactorizationMachines): The Factorization Machines model to be trained.
+        X_data (np.ndarray): The input data matrix of shape (D, N), where D is the number of features and N is the number of samples.
+        Y_data (np.ndarray): The output data matrix of shape (N,).
+        max_iter (int): The maximum number of iterations to run the ALS algorithm. Default is 100.
+        use_true_error (bool): Whether to calculate the true error (Y_data - Y_pred) in each iteration. Default is False.
+        lamb_b (float): The regularization parameter for the bias term b. Default is 0.
+        lamb_w (float): The regularization parameter for the weight vector w. Default is 0.
+        lamb_v (float): The regularization parameter for the factor matrix V. Default is 0.
+        var_y (float): The variance of the likelihood `p(y | X, theta)`. Default is 1.
+
+    Returns:
+        np.ndarray(max_iter + 1,): The error history of the algorithm.
+
+    References:
+        S. Rendle,
+        Bayesian Factorization Machines,
+        in Proceedings of the NIPS Workshop on Sparse Representation and Low-Rank Approximation (2011).
+    """
+    rng = np.random.default_rng(seed)
+
+    # extract dimensions
+    D = X_data.shape[0]
+    N = model.w.shape[0]
+    K = model.V.shape[1]
+
+    # precompute: O(DN) + O(K) = O(DN)
+    X_squared = X_data ** 2
+    error = Y_data - model.predict(X_data)
+    V_X = np.empty((D, K))
+    for k in range(K):
+        V_X[:, k] = np.sum(model.V[:, k] * X_data, axis=1)
+
+    # error history
+    error_hist = np.empty(max_iter + 1, dtype=float)
+    if use_true_error:
+        error_true = Y_data - model.predict(X_data)
+        error_hist[0] = (np.mean(error_true**2))
+    else:
+        error_hist[0] = (np.mean(error**2))
+    for iter in range(max_iter):
+
+        # update b: 1 * O(D) = O(D)
+        variance_param = var_y / (D + lamb_b)
+        delta_param = np.sum(error) / (D + lamb_b) + rng.normal(0, variance_param)
+        delta_error = -np.sum(delta_param)
+        model.b += delta_param
+        error += delta_error
+
+        # update w: N * O(D) = O(N * D)
+        for n in range(N):
+            G = X_data[:, n]
+            variance_param = var_y / (G.T @ G + lamb_w)
+            delta_param = G.T @ error / (G.T @ G + lamb_v) + rng.normal(0, variance_param)
+            delta_error = -delta_param * G
+            model.w[n] += delta_param
+            error += delta_error
+
+        # update V: N * K * O(D) = O(N * D * K)
+        for n in range(N):
+            for k in range(K):
+                # G = X_data[:, n] * np.sum(model.V[:, k] * X_data, axis=1) - model.V[n, k] * X_data[:, n] ** 2
+                G = X_data[:, n] * V_X[:, k] - model.V[n, k] * X_squared[:, n]
+                variance_param = var_y / (G.T @ G + lamb_v)
+                delta_param = G.T @ error / (G.T @ G + lamb_v) + rng.normal(0, variance_param)
                 delta_V_X_k = delta_param * X_data[:, n]
                 delta_error = -delta_param * G
                 model.V[n, k] += delta_param
