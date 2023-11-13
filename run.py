@@ -4,28 +4,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-D = 64
+from julia import Main # type: ignore
+
+D = 16
 N = 16
 K = 8
 var_y = .1
 
-Q: np.ndarray = np.random.rand(N, N)
-X_data: np.ndarray = np.random.choice([0, 1], size=(D,N))
-Y_data: np.ndarray = np.einsum("ij,ij->i", X_data @ Q, X_data @ Q) + np.random.normal(0, var_y, size=D)
+seed = 0
+rng = np.random.default_rng(seed)
 
-model = FM.FactorizationMachines(n_features=N, n_factors=K, seed=0)
-MSE_hist_als = FM.train_als(model, X_data, Y_data, max_iter=1000, use_true_error=True)
+Q: np.ndarray = 2*rng.random((N, N))-1
+X_data: np.ndarray = rng.choice([0, 1], size=(D,N))
+Y_data: np.ndarray = np.einsum("di,ij,dj->d", X_data, Q, X_data) + rng.normal(0, var_y, size=D)
+print("X_data:", X_data)
+print("Y_data:", Y_data)
 
-model = FM.FactorizationMachines(n_features=N, n_factors=K, seed=0)
-MSE_hist_bayes = FM.train_bayes(model, X_data, Y_data, max_iter=1000, var_y=var_y, use_true_error=True)
-# use_true_error: Use the true error value to ensure that the MSE value is accurate (not recommended
+model = FM.FactorizationMachines(N, K, seed=seed)
+Y_pred = model.predict(X_data)
+b, w, V, MSE_hist_als = FM.train_als(X_data, Y_data, Y_pred, model.b, model.w, model.V, max_iter=1000)
+b, w, V, MSE_hist_als_julia = FM.train_als_julia(X_data, Y_data, Y_pred, model.b, model.w, model.V, max_iter=1000)
 
-plt.plot(MSE_hist_als, label="ALS")
-plt.plot(MSE_hist_bayes, label="Bayes")
+plt.plot(MSE_hist_als, label="ALS (Python)")
+plt.plot(MSE_hist_als_julia, label="ALS (Julia)")
 plt.xlabel("Iteration")
 plt.ylabel("MSE")
 plt.yscale("log")
-plt.ylim(bottom=1e-10)
 plt.legend()
 
 if not os.path.exists("figures"):
