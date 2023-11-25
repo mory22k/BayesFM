@@ -27,7 +27,7 @@ b, w, V, MSE_hist_bayes_jl = BFM.train_bayes_julia(X_data, Y_data, Y_pred, model
 #b, w, V, MSE_hist_bayes_py = BFM.train_bayes_julia(X_data, Y_data, Y_pred, model.b, model.w, model.V, als_iter=10, max_iter=1000)
 
 plt.plot(MSE_hist_als_jl, label="ALS")
-plt.plot(MSE_hist_bayes_jl, label="Bayes (Julia)")
+plt.plot(MSE_hist_bayes_jl, label="Bayes")
 #plt.plot(MSE_hist_als_py, label="ALS (Python)")
 #plt.plot(MSE_hist_bayes_py, label="Bayes (Python)")
 plt.xlabel("Iteration")
