@@ -1,12 +1,10 @@
-from functions import FM
+from functions import FM, FMALS, BFM
 
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from julia import Main # type: ignore
-
-D = 16
+D = 32
 N = 16
 K = 8
 var_y = .1
@@ -21,12 +19,17 @@ print("X_data:", X_data)
 print("Y_data:", Y_data)
 
 model = FM.FactorizationMachines(N, K, seed=seed)
-Y_pred = model.predict(X_data)
-b, w, V, MSE_hist_als = FM.train_als(X_data, Y_data, Y_pred, model.b, model.w, model.V, max_iter=1000)
-b, w, V, MSE_hist_als_julia = FM.train_als_julia(X_data, Y_data, Y_pred, model.b, model.w, model.V, max_iter=1000)
 
-plt.plot(MSE_hist_als, label="ALS (Python)")
-plt.plot(MSE_hist_als_julia, label="ALS (Julia)")
+Y_pred = model.predict(X_data)
+b, w, V, MSE_hist_als_jl = FMALS.train_als_julia(X_data, Y_data, Y_pred, model.b, model.w, model.V, max_iter=1000)
+b, w, V, MSE_hist_bayes_jl = BFM.train_bayes_julia(X_data, Y_data, Y_pred, model.b, model.w, model.V, als_iter=10, max_iter=1000)
+#b, w, V, MSE_hist_als_py = FMALS.train_als(X_data, Y_data, Y_pred, model.b, model.w, model.V, max_iter=1000)
+#b, w, V, MSE_hist_bayes_py = BFM.train_bayes_julia(X_data, Y_data, Y_pred, model.b, model.w, model.V, als_iter=10, max_iter=1000)
+
+plt.plot(MSE_hist_als_jl, label="ALS")
+plt.plot(MSE_hist_bayes_jl, label="Bayes (Julia)")
+#plt.plot(MSE_hist_als_py, label="ALS (Python)")
+#plt.plot(MSE_hist_bayes_py, label="Bayes (Python)")
 plt.xlabel("Iteration")
 plt.ylabel("MSE")
 plt.yscale("log")

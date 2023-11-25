@@ -1,5 +1,5 @@
 # Fast Altenate Least Squares for Factorization Machines
-My implementation of alternate least squares (ALS) for Factorization Machines using NumPy.
+My implementation of alternate least squares (ALS) for Factorization Machines, as well as Bayesian Factorization Machines (BFM), using NumPy and Julia.
 
 ## References
 1. S. Rendle, Factorization Machines, in 2010 IEEE International Conference on Data Mining (2010), pp. 995–1000.
