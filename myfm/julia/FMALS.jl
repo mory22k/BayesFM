@@ -11,9 +11,17 @@ function least_squares(x_hist::Array{Float64, 1}, y_hist::Array{Float64, 1}, lam
     return w_pred
 end
 
-function train_als(X_data::Array{Float64, 2}, Y_data::Array{Float64, 1}, Y_pred::Array{Float64, 1},
-                   b_init::Float64, w_init::Array{Float64, 1}, V_init::Array{Float64, 2},
-                   max_iter::Int, hyper_param::Dict)
+function train_als(
+    X_data::Array{Float64, 2},
+    Y_data::Array{Float64, 1},
+    Y_pred::Array{Float64, 1},
+    b_init::Float64,
+    w_init::Array{Float64, 1},
+    V_init::Array{Float64, 2},
+    max_iter::Int,
+    show_progress::Bool,
+    hyper_param::Dict
+)
     b = copy(b_init)
     w = copy(w_init)
     V = copy(V_init)
@@ -22,7 +30,7 @@ function train_als(X_data::Array{Float64, 2}, Y_data::Array{Float64, 1}, Y_pred:
     K = size(V, 2)
 
     # precompute error and quadratic
-    error = Y_data - Y_pred # (D,)
+    error = Y_pred - Y_data # (D,)
     quad = X_data * V       # (D, K)
     error_hist = Array{Float64, 1}(undef, max_iter + 1)
     error_hist[1] = mean(error .^ 2)
@@ -31,7 +39,7 @@ function train_als(X_data::Array{Float64, 2}, Y_data::Array{Float64, 1}, Y_pred:
         # update b
         x_hist = ones(length(X_data[:, 1]))
         y_hist = b .- error
-        b_new = least_squares(x_hist, y_hist, hyper_param["param_precision"])
+        b_new = least_squares(x_hist, y_hist, hyper_param["precision_param"])
         error = error .+ b_new .- b
         b = b_new
 
@@ -39,7 +47,7 @@ function train_als(X_data::Array{Float64, 2}, Y_data::Array{Float64, 1}, Y_pred:
         for i in 1:N
             x_hist = X_data[:, i]
             y_hist = x_hist .* (w[i] .* x_hist .- error)
-            w_i_new = least_squares(x_hist, y_hist, hyper_param["param_precision"])
+            w_i_new = least_squares(x_hist, y_hist, hyper_param["precision_param"])
             error = error .+ (w_i_new - w[i]) .* x_hist
             w[i] = w_i_new
         end
@@ -50,14 +58,15 @@ function train_als(X_data::Array{Float64, 2}, Y_data::Array{Float64, 1}, Y_pred:
                 G_ik = X_data[:, i] .* (quad[:, k] - V[i, k] .* X_data[:, i])
                 x_hist = G_ik
                 y_hist = (V[i, k] .* G_ik .- error)
-                V_ik_new = least_squares(x_hist, y_hist, hyper_param["param_precision"])
+                V_ik_new = least_squares(x_hist, y_hist, hyper_param["precision_param"])
                 error = error .+ (V_ik_new - V[i, k]) .* G_ik
                 quad[:, k] = quad[:, k] .+ (V_ik_new - V[i, k]) .* X_data[:, i]
+                V[i, k] = V_ik_new
             end
         end
 
         error_hist[iter + 1] = mean(error .^ 2)
-        if (iter + 1) % 50 == 0
+        if show_progress & ((iter + 1) % 50 == 0)
             println("iter: $(iter + 1), error: $(mean(error .^ 2))")
         end
     end
