@@ -1,20 +1,18 @@
 [tool.poetry]
-name = "myfm"
-version = "0.1.0"
+name = "fm_gibbs"
+version = "0.1.1"
 description = ""
-authors = ["KM"]
+authors = ["mory22k <mory22k@dc.tohoku.ac.jp>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-julia = "^0.6.1"
-numpy = "^1.26.2"
-matplotlib = "^3.8.2"
-pytest = "^7.4.3"
+python = "^3.12,<3.13"
+numpy = "^2.0.0"
+torch = "^2.3.1"
+matplotlib = "^3.9.0"
+pytest = "^8.2.2"
+
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-install-julia = 'myfm.install_julia:install_julia'
