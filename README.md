@@ -1,5 +1,11 @@
 # Fast Altenate Least Squares for Factorization Machines
-My implementation of alternate least squares (ALS) for Factorization Machines, as well as Bayesian Factorization Machines (BFM), using NumPy and Julia.
+My implementation of alternate least squares (ALS) for 2nd-order Factorization Machines, as well as Bayesian Factorization Machines (BFM), using NumPy.
+
+## How to use
+1. Install Python 3.12 via pyenv. See https://github.com/pyenv/pyenv for installation instructions.
+2. Install poetry. See https://python-poetry.org/docs/#installation for installation instructions.
+3. Run `poetry install` to install dependencies.
+4. Run `poetry run pytest` to run the test script. The test script will train the FM and BFM models using randomly generated data and compare the results in terms of RMSE. The result figure will be saved in the `test/out` directory.
 
 ## References
 1. S. Rendle, Factorization Machines, in 2010 IEEE International Conference on Data Mining (2010), pp. 995–1000.
@@ -7,4 +13,4 @@ My implementation of alternate least squares (ALS) for Factorization Machines, a
 3. S. Rendle, Factorization Machines with libFM, ACM Trans. Intell. Syst. Technol. 3, 1 (2012).
 
 ## License
-This project is licensed under the MIT license. See the LICENSE.txt file for details.
+This project is licensed under the MIT license.
