@@ -1,8 +1,10 @@
 import numpy as np
-from fm_gibbs.FM import fm_fast
+from fm_gibbs.FM import fm_fast, FactorizationMachineRegressor
 
 def alternate_least_squares(
-    X, y, b_init, w_init, v_init, l_b, l_w, l_v, n_iter=100, logger=None, return_errors=False, check_error=False
+    X, y, b_init, w_init, v_init,
+    l_b, l_w, l_v,
+    n_iter=100, logger=None, record_error=False, check_error=False
 ):
     b = np.copy(b_init)
     w = w_init.copy()
@@ -19,7 +21,7 @@ def alternate_least_squares(
     e = f - y # (N,)
 
     error_history = []
-    if return_errors:
+    if record_error:
         error_history.append(np.mean(e**2))
 
     for mcs in range(n_iter):
@@ -51,13 +53,47 @@ def alternate_least_squares(
             )
             assert np.isclose(e, f_pred - y).all()
 
-        if logger is not None or return_errors:
-            error = np.mean(e**2)
+        if logger is not None or record_error:
+            error = np.sqrt(np.mean(e**2))
         if logger is not None:
             logger.info(f'{mcs:4d} | {error:10.3e}')
-        if return_errors:
+        if record_error:
             error_history.append(error)
 
-    if return_errors:
-        return b, w, v, error_history
-    return b, w, v
+    return b, w, v, error_history
+
+class FactorizationMachineALSRegressor(FactorizationMachineRegressor):
+    def __init__(
+        self,
+        dim_hidden=5,
+        max_iter=100,
+        warm_start=True,
+        seed=None,
+        alpha_b=1.0,
+        alpha_w=1.0,
+        alpha_v=1.0,
+    ):
+        super().__init__(dim_hidden, seed)
+
+        self.n_iter_ = max_iter
+        self.warm_start = warm_start
+        self.error_history_ = None
+
+        self.alpha_b_ = alpha_b
+        self.alpha_w_ = alpha_w
+        self.alpha_v_ = alpha_v
+
+    def fit(self, X, y, logger=None, record_error=False):
+        if not self.warm_start or self.coef_ is None:
+            self.initialize_params(X, y)
+
+        b, w, v = self.get_params()
+
+        b, w, v, error_history = alternate_least_squares(
+            X, y, b, w, v,
+            self.alpha_b_, self.alpha_w_, self.alpha_v_,
+            n_iter=self.n_iter_, logger=logger, record_error=record_error
+        )
+
+        self.set_params(b, w, v)
+        self.error_history_ = error_history
