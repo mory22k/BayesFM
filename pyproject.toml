@@ -4,6 +4,7 @@ version = "0.1.1"
 description = ""
 authors = ["mory22k <mory22k@dc.tohoku.ac.jp>"]
 readme = "README.md"
+packages = [{include = "fm_gibbs", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12,<3.13"
