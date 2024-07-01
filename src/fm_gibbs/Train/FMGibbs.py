@@ -98,7 +98,7 @@ def gibbs_sampling(
         if record_error:
             error_history.append(error)
 
-    return b, w, v, mu_w, mu_b, sigma2_w, sigma2_v, error_history
+    return b, w, v, mu_w, mu_v, sigma2_w, sigma2_v, error_history
 
 class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
     def __init__(
