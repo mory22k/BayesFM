@@ -84,7 +84,7 @@ class FactorizationMachineALSRegressor(FactorizationMachineRegressor):
         self.alpha_v_ = alpha_v
 
     def fit(self, X, y, logger=None, record_error=False):
-        if not self.warm_start or self.coef_ is None:
+        if not self.warm_start or self.bias_ is None:
             self.initialize_params(X, y)
 
         b, w, v = self.get_params()

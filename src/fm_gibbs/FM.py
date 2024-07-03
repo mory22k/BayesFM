@@ -38,7 +38,7 @@ class FactorizationMachineRegressor:
         N, d = X.shape
         self.bias_ = np.mean(y)
         self.linear_coef_ = np.zeros(d)
-        self.hidden_vector_ = self.rng.standard_normal(size=(d, self.dim_hidden_))
+        self.hidden_vector_ = np.zeros((d, self.dim_hidden_))
 
     def fit(self, X, y):
         raise NotImplementedError
