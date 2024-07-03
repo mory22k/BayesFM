@@ -1,6 +1,15 @@
 import numpy as np
+import logging
 from fm_gibbs.FM import fm_fast, FactorizationMachineRegressor
 from fm_gibbs.Train.FMALS import alternate_least_squares
+
+logger_local = logging.getLogger(__name__)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - [%(levelname)s] - %(message)s')
+console_handler.setFormatter(formatter)
+logger_local.addHandler(console_handler)
+
 
 def gibbs_sampling(
     X, y, b_init, w_init, v_init,
@@ -148,7 +157,7 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
         self.sigma2_w_ = 1.0
         self.sigma2_v_ = np.ones(self.dim_hidden_)
 
-    def fit(self, X, y, logger=None, record_error=False):
+    def fit(self, X, y, logger=None, record_error=False, max_retries=3):
         if not self.warm_start or self.bias_ is None:
             self.initialize_params(X, y)
             self.initialize_hidden_params(X, y)
@@ -156,14 +165,27 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
         b, w, v = self.get_params()
         mu_w, mu_v, sigma2_w, sigma2_v = self.get_hidden_params()
 
-        b, w, v, mu_w, mu_v, sigma2_w, sigma2_v, error_history = gibbs_sampling(
-            X, y, b, w, v,
-            mu_w, mu_v, sigma2_w, sigma2_v,
-            self.mu_b_, self.sigma2_b_, self.alpha_, self.beta_,
-            self.alpha_0_, self.beta_0_, self.m_0_, self.tau2_0_,
-            n_iter=self.n_iter_, n_pretrain=self.n_pretrain_iter_,
-            logger=logger, record_error=record_error, rng=self.rng
-        )
+        retries = 0
+        while retries < max_retries:
+            try:
+                b, w, v, mu_w, mu_v, sigma2_w, sigma2_v, error_history = gibbs_sampling(
+                    X, y, b, w, v,
+                    mu_w, mu_v, sigma2_w, sigma2_v,
+                    self.mu_b_, self.sigma2_b_, self.alpha_, self.beta_,
+                    self.alpha_0_, self.beta_0_, self.m_0_, self.tau2_0_,
+                    n_iter=self.n_iter_, n_pretrain=self.n_pretrain_iter_,
+                    logger=logger, record_error=record_error, rng=self.rng
+                )
+                break
+            except OverflowError as oe:
+                retries += 1
+                if retries < max_retries:
+                    logger_local.warning(f"OverflowError occurred. Retrying... ({retries}/{max_retries})")
+                    self.initialize_params(X, y)
+                    self.initialize_hidden_params(X, y)
+                else:
+                    raise RuntimeError(f'Max retries reached. OverflowError: {oe}')
+
 
         self.set_params(b, w, v)
         self.set_hidden_params(mu_w, mu_v, sigma2_w, sigma2_v)
