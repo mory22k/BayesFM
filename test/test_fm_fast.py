@@ -1,17 +1,17 @@
 import numpy as np
 import time
-from fm_gibbs import FM
+from fmgibbs import fm
 
-def test_fastfm():
+def test_fm_fast():
     x = np.random.uniform(-1, 1, 100)
     b = np.random.uniform(-1, 1)
     w = np.random.uniform(-1, 1, 100)
     v = np.random.uniform(-1, 1, (100, 10))
 
     time_1 = time.time()
-    fm_a = FM.fm_naive(x, b, w, v)
+    fm_a = fm.fm_naive(x, b, w, v)
     time_2 = time.time()
-    fm_b = FM.fm_fast(x, b, w, v)
+    fm_b = fm.fm_fast(x, b, w, v)
     time_3 = time.time()
 
     print(f'Naive FM: {time_2 - time_1:10.3e}')
@@ -20,4 +20,4 @@ def test_fastfm():
     assert np.isclose(fm_a, fm_b)
 
 if __name__ == '__main__':
-    test_fastfm()
+    test_fm_fast()

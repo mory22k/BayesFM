@@ -1,7 +1,7 @@
 import numpy as np
 import logging
-from fm_gibbs.FM import fm_fast, FactorizationMachineRegressor
-from fm_gibbs.Train.FMALS import alternate_least_squares
+from fmgibbs.fm import fm_fast, FactorizationMachineRegressor
+from fmgibbs.train.als import alternate_least_squares
 
 logger_local = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
@@ -27,7 +27,7 @@ def gibbs_sampling(
     assert 0 <= n_pretrain <= n_iter
     n_iter -= n_pretrain
     b, w, v, error_history = alternate_least_squares(
-        X, y, b, w, v, 1, 1, 1, n_iter=n_pretrain, record_error=True
+        X, y, b, w, v, 1, 1, 1, n_iter=n_pretrain, logger=logger, record_error=True
     )
 
     N, d = X.shape
@@ -48,7 +48,7 @@ def gibbs_sampling(
     alpha_theta_star = alpha_0 + (d + 1) / 2
     tau2_theta_star = 1 / (1 / tau2_0 + d)
 
-    for mcs in range(n_iter):
+    for mcs in range(n_pretrain, n_iter):
         # update sigma2
         beta_star = beta + e @ e / 2
         sigma2 = 1 / rng.gamma(alpha_star, 1 / beta_star)
@@ -114,7 +114,7 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
         self,
         dim_hidden=5,
         max_iter=100,
-        max_pretrain_iter=5,
+        max_pretrain_iter=1,
         warm_start=True,
         seed=None,
         mu_b=0.0,
@@ -185,7 +185,6 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
                     self.initialize_hidden_params(X, y)
                 else:
                     raise RuntimeError(f'Max retries reached. OverflowError: {oe}')
-
 
         self.set_params(b, w, v)
         self.set_hidden_params(mu_w, mu_v, sigma2_w, sigma2_v)

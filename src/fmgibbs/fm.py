@@ -19,11 +19,11 @@ def fm_fast(x, b, w, v, q=None):
 
     return bias + linear_term + interaction_term
 
-def fm_grad_b(X):
+def train_grad_b(X):
     N, _ = X.shape
     return np.ones(N)
 
-def fm_grad_w(X, i):
+def train_grad_w(X, i):
     return X[:, i]
 
 class FactorizationMachineRegressor:
@@ -38,12 +38,14 @@ class FactorizationMachineRegressor:
         N, d = X.shape
         self.bias_ = np.mean(y)
         self.linear_coef_ = np.zeros(d)
-        self.hidden_vector_ = np.zeros((d, self.dim_hidden_))
+        self.hidden_vector_ = self.rng.standard_normal((d, self.dim_hidden_))
 
     def fit(self, X, y):
         raise NotImplementedError
 
     def predict(self, X):
+        if X.ndim == 1:
+            X = X.reshape(1, -1)
         return np.apply_along_axis(
             lambda x: fm_fast(x, self.bias_, self.linear_coef_, self.hidden_vector_), axis=1, arr=X
         )
@@ -58,3 +60,5 @@ class FactorizationMachineRegressor:
         self.bias_ = bias
         self.linear_coef_ = linear_coef
         self.hidden_vector_ = hidden_vector
+
+        assert np.all(self.hidden_vector_ == hidden_vector)

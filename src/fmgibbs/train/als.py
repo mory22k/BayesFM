@@ -1,5 +1,5 @@
 import numpy as np
-from fm_gibbs.FM import fm_fast, FactorizationMachineRegressor
+from fmgibbs.fm import fm_fast, FactorizationMachineRegressor
 
 def alternate_least_squares(
     X, y, b_init, w_init, v_init,
