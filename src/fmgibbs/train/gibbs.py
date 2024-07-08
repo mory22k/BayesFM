@@ -10,7 +10,6 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - [%(levelname)s] - %(mess
 console_handler.setFormatter(formatter)
 logger_local.addHandler(console_handler)
 
-
 def gibbs_sampling(
     X, y, b_init, w_init, v_init,
     mu_w, mu_v, sigma2_w, sigma2_v,
@@ -115,6 +114,7 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
         dim_hidden=5,
         max_iter=100,
         max_pretrain_iter=1,
+        max_retries=3,
         warm_start=True,
         seed=None,
         mu_b=0.0,
@@ -130,6 +130,7 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
 
         self.n_iter_ = max_iter
         self.n_pretrain_iter_ = max_pretrain_iter
+        self.max_retries = max_retries
         self.warm_start = warm_start
         self.error_history_ = None
         self.rng = np.random.default_rng(seed)
@@ -157,7 +158,7 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
         self.sigma2_w_ = 1.0
         self.sigma2_v_ = np.ones(self.dim_hidden_)
 
-    def fit(self, X, y, logger=None, record_error=False, max_retries=3):
+    def fit(self, X, y, logger=None, record_error=False):
         if not self.warm_start or self.bias_ is None:
             self.initialize_params(X, y)
             self.initialize_hidden_params(X, y)
@@ -166,25 +167,29 @@ class FactorizationMachineGibbsSampler(FactorizationMachineRegressor):
         mu_w, mu_v, sigma2_w, sigma2_v = self.get_hidden_params()
 
         retries = 0
-        while retries < max_retries:
-            try:
-                b, w, v, mu_w, mu_v, sigma2_w, sigma2_v, error_history = gibbs_sampling(
-                    X, y, b, w, v,
-                    mu_w, mu_v, sigma2_w, sigma2_v,
-                    self.mu_b_, self.sigma2_b_, self.alpha_, self.beta_,
-                    self.alpha_0_, self.beta_0_, self.m_0_, self.tau2_0_,
-                    n_iter=self.n_iter_, n_pretrain=self.n_pretrain_iter_,
-                    logger=logger, record_error=record_error, rng=self.rng
-                )
-                break
-            except OverflowError as oe:
-                retries += 1
-                if retries < max_retries:
-                    logger_local.warning(f"OverflowError occurred. Retrying... ({retries}/{max_retries})")
-                    self.initialize_params(X, y)
-                    self.initialize_hidden_params(X, y)
-                else:
-                    raise RuntimeError(f'Max retries reached. OverflowError: {oe}')
+        with np.errstate(all='raise'):
+            while retries <= self.max_retries:
+                try:
+                    b, w, v, mu_w, mu_v, sigma2_w, sigma2_v, error_history = gibbs_sampling(
+                        X, y, b, w, v,
+                        mu_w, mu_v, sigma2_w, sigma2_v,
+                        self.mu_b_, self.sigma2_b_, self.alpha_, self.beta_,
+                        self.alpha_0_, self.beta_0_, self.m_0_, self.tau2_0_,
+                        n_iter=self.n_iter_, n_pretrain=self.n_pretrain_iter_,
+                        logger=logger, record_error=record_error, rng=self.rng
+                    )
+                    break
+                except KeyboardInterrupt as e:
+                    raise e
+                except Exception as _:
+                    retries += 1
+                    if retries < self.max_retries:
+                        self.initialize_params(X, y)
+                        self.initialize_hidden_params(X, y)
+                        logger_local.error(f'Gibbs sampling failed. Retrying ({retries}/{self.max_retries})...')
+                    else:
+                        logger_local.error('Gibbs sampling failed. Max retries reached.')
+                        return
 
         self.set_params(b, w, v)
         self.set_hidden_params(mu_w, mu_v, sigma2_w, sigma2_v)
