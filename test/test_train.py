@@ -12,7 +12,7 @@ def test_train():
     seed = 72
     n_iter = 5000
 
-    N = 500
+    N = 1000
     d = 16
     k = 5
 
