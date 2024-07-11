@@ -83,7 +83,7 @@ class FactorizationMachineALSRegressor(FactorizationMachineRegressor):
         self.alpha_w_ = alpha_w
         self.alpha_v_ = alpha_v
 
-    def fit(self, X, y, logger=None, record_error=False):
+    def fit(self, X, y, logger=None, record_error=False, check_error=False):
         if not self.warm_start or self.bias_ is None:
             self.initialize_params(X, y)
 
@@ -92,7 +92,7 @@ class FactorizationMachineALSRegressor(FactorizationMachineRegressor):
         b, w, v, error_history = alternate_least_squares(
             X, y, b, w, v,
             self.alpha_b_, self.alpha_w_, self.alpha_v_,
-            n_iter=self.n_iter_, logger=logger, record_error=record_error
+            n_iter=self.n_iter_, logger=logger, record_error=record_error, check_error=check_error
         )
 
         self.set_params(b, w, v)
