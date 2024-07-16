@@ -38,9 +38,6 @@ def test_train():
     logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
 
-    fig = plt.figure(dpi=300)
-    ax = fig.add_subplot(111)
-
     num_data = 10
     fm_grad.fit(X[:num_data], y_true[:num_data], logger=logger, record_error=True)
     fm_als.fit(X[:num_data], y_true[:num_data], logger=logger, record_error=True)
@@ -56,6 +53,9 @@ def test_train():
     history_grad_1000 = fm_grad.error_history_
     history_als_1000 = fm_als.error_history_
     history_gibbs_1000 = fm_gibbs.error_history_
+
+    fig = plt.figure(dpi=300)
+    ax = fig.add_subplot(111)
 
     ax.plot(history_grad_10, label=r'Grad, N=$10$', linestyle=':')
     ax.plot(history_grad_1000, label=r'Grad, N=$1000$', linestyle=':')

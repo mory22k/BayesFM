@@ -9,6 +9,12 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - [%(levelname)s] - %(mess
 console_handler.setFormatter(formatter)
 logger_local.addHandler(console_handler)
 
+def sample_from_inverse_gamma(alpha, beta, rng):
+    if beta <= 0:
+        logger_local.warning('beta <= 0')
+        beta = 1e-6
+    return 1 / rng.gamma(alpha, 1 / beta)
+
 def gibbs_sampling(
     X, y, b_init, w_init, v_init,
     mu_w, mu_v, sigma2_w, sigma2_v,
@@ -44,25 +50,19 @@ def gibbs_sampling(
     for mcs in range(n_iter):
         # update sigma2
         beta_star = beta + e @ e / 2
-        if beta_star <= 0:
-            beta_star = 1e-6
-            logger_local.warning(f'beta_star <= 0 at mcs={mcs}')
-        sigma2 = 1 / rng.gamma(alpha_star, 1 / beta_star)
+        sigma2 = sample_from_inverse_gamma(alpha_star, beta_star, rng)
 
         # update sigma2_w, mu_w
         beta_w_star = beta_0 + ( ((w[:] - mu_w)**2).sum() - (mu_w - m_0)**2 ) / 2
         m_w_star = tau2_theta_star * (w[:].sum() + m_0 / tau2_0)
-        if beta_w_star <= 0:
-            logger_local.warning(f'beta_w_star <= 0 at mcs={mcs}')
-            beta_w_star = 1e-6
-        sigma2_w = 1 / rng.gamma(alpha_theta_star, 1 / beta_w_star)
+        sigma2_w = sample_from_inverse_gamma(alpha_theta_star, beta_w_star, rng)
         mu_w = rng.normal(m_w_star, np.sqrt(tau2_theta_star * sigma2_w))
 
         # update sigma2_v, mu_v
         for f in range(k):
             beta_v_f_star = beta_0 + ( ((v[:,f] - mu_v[f])**2).sum() - (mu_v[f] - m_0)**2 ) / 2
             m_v_f_star = tau2_theta_star * (v[:,f].sum() + m_0 / tau2_0)
-            sigma2_v[f] = 1 / rng.gamma(alpha_theta_star, 1 / beta_v_f_star)
+            sigma2_v[f] = sample_from_inverse_gamma(alpha_theta_star, beta_v_f_star, rng)
             mu_v[f] = rng.normal(m_v_f_star, np.sqrt(tau2_theta_star * sigma2_v[f]))
 
         # update b
