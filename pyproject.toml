@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "fmgibbs"
+name = "bayesfm"
 version = "0.2"
 description = ""
 authors = ["mory22k <mory22k@dc.tohoku.ac.jp>"]
 readme = "README.md"
-packages = [{include = "fmgibbs", from = "src"}]
+packages = [{include = "bayesfm", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.12,<3.13"
