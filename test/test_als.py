@@ -1,6 +1,6 @@
 import numpy as np
 import logging
-from fmgibbs.train import als
+from bayesfm.train import als
 
 def test_als():
     logger = logging.getLogger(__name__)

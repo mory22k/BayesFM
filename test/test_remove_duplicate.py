@@ -1,4 +1,4 @@
-from fmgibbs.utils import remove_duplicate_rows
+from bayesfm.utils import remove_duplicate_rows
 import numpy as np
 
 def test_remove_duplicate_rows():

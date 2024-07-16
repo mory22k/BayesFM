@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from fmgibbs import fm
+from bayesfm import fm
 
 def test_fm_fast():
     x = np.random.uniform(-1, 1, 100)

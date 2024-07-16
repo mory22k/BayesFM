@@ -2,9 +2,9 @@ import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 import logging
-from fmgibbs.train.als import FactorizationMachineALSRegressor
-from fmgibbs.train.gibbs import FactorizationMachineGibbsSampler
-from fmgibbs.train.grad import FactorizationMachineGradRegressor
+from bayesfm.train.als import FactorizationMachineALSRegressor
+from bayesfm.train.gibbs import FactorizationMachineGibbsSampler
+from bayesfm.train.grad import FactorizationMachineGradRegressor
 import matplotlib.pyplot as plt
 from pathlib import Path
 

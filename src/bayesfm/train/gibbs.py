@@ -1,6 +1,6 @@
 import numpy as np
 import logging
-from fmgibbs.fm import fm_fast, FactorizationMachineRegressor
+from bayesfm.fm import fm_fast, FactorizationMachineRegressor
 
 logger_local = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()

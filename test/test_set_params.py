@@ -1,6 +1,6 @@
 import numpy as np
 import logging
-from fmgibbs.train import als, gibbs, grad
+from bayesfm.train import als, gibbs, grad
 
 def test_set_params():
     logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ def test_set_params():
 
     fm_grad = grad.FactorizationMachineGradRegressor(seed=seed, max_iter=5)
     fm_als = als.FactorizationMachineALSRegressor(seed=seed, max_iter=5)
-    fm_gibbs = gibbs.FactorizationMachineGibbsSampler(seed=seed, max_iter=5, max_pretrain_iter=0)
+    fm_gibbs = gibbs.FactorizationMachineGibbsSampler(seed=seed, max_iter=5)
 
     fm_grad.fit(X, y, logger=logger, record_error=True)
     fm_als.fit(X, y, logger=logger, record_error=True)
