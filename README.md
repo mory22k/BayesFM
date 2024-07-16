@@ -6,7 +6,7 @@ My implementation of Bayesian Factorization Machines (BFM), as well as alternate
 2. Install poetry. See https://python-poetry.org/docs/#installation for installation instructions.
 3. Run `poetry shell` to activate the virtual environment.
 4. Run `poetry install` to install dependencies.
-5. Run `poetry run pytest` to run the test script. The test script will train the FM and BFM models using randomly generated data and compare the results in terms of RMSE. The result figure will be saved in the `test/out` directory.
+5. Run `poetry run pytest` to run the test scripts. FM models are trained using randomly generated data and their train RMSEs are visualized. The result figure will be saved in the `test/out` directory.
 
 ## References
 1. S. Rendle, Factorization Machines, in 2010 IEEE International Conference on Data Mining (2010), pp. 995–1000.
