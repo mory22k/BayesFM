@@ -1,0 +1,7 @@
+[tools]
+lefthook = "latest"
+node = "latest"
+npm = "latest"
+python = "3.13"
+task = "latest"
+uv = "latest"

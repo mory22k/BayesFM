@@ -1,0 +1,62 @@
+version: '3'
+tasks:
+  default:
+    aliases:
+      - list
+    desc: List all tasks
+    cmd: task --list-all
+
+  cleanup:
+    desc: Clean up the virtual environment
+    cmds:
+      - rm -rf .venv
+
+  format:
+    desc: Format the code
+    cmds:
+      - uv run ruff format src/ tests/ -v
+
+  fix:
+    desc: Fix the code
+    cmds:
+      - uv run ruff check --fix src/ tests/ -v
+
+  check:
+    desc: Check the code
+    deps:
+      - task: check:ruff
+      - task: check:mypy
+
+  check:ruff:
+    desc: Check the code with ruff
+    cmds:
+      - uv run ruff check src/ tests/
+
+  check:mypy:
+    desc: Check the code with mypy
+    cmds:
+      - uv run mypy src/
+
+  test:
+    desc: Run the tests
+    cmds:
+      - uv run pytest tests/ -vs
+
+  update:lefthook:
+    aliases:
+      - ul
+    desc: Update the lefthook configuration
+    cmds:
+      - lefthook uninstall && lefthook install
+
+  setup:
+    desc: Set up the development environment
+    cmds:
+      - uv sync
+      - npm install
+      - uv run lefthook install
+
+  commit:
+    desc: Commit the changes
+    cmds:
+      - git commit
