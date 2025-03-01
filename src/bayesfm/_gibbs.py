@@ -14,11 +14,12 @@
 
 import logging
 import warnings
-
 from typing import Any
+
 from numpy.typing import NDArray
 import numpy as np
 from tqdm import tqdm
+import dimod
 
 from ._base import BaseFMRegression
 from ._fm import fm_fast
@@ -539,3 +540,33 @@ class BayesFMRegression(BaseFMRegression):
 
         self.is_fitted = True
         return self
+
+    def to_bqm(self) -> dimod.BinaryQuadraticModel:
+        """Converts the fitted model to a BinaryQuadraticModel.
+
+        Returns:
+            dimod.BinaryQuadraticModel: The model as a BinaryQuadraticModel.
+        """
+        d = len(self.w_)
+
+        linear = {i: w for i, w in enumerate(self.w_)}
+
+        i_idx, j_idx = np.triu_indices(d, k=1)
+        quadratic = {}
+        for i, j in zip(i_idx, j_idx):
+            quadratic[(i, j)] = self.V_[i, :] @ self.V_[j, :]
+
+        offset = self.intercept_
+        bqm = dimod.BinaryQuadraticModel(linear, quadratic, offset, dimod.BINARY)
+        return bqm
+
+    def predict(self, x: NDArray) -> NDArray | float:
+        """Predicts the target value for the input feature vector.
+
+        Args:
+            x (NDArray): Input feature vector of shape (d,).
+
+        Returns:
+            NDArray: Predicted target value.
+        """
+        return fm_fast(x, self.intercept_, self.w_, self.V_)

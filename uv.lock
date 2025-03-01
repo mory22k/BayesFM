@@ -111,6 +111,7 @@ version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "colorlog" },
+    { name = "dimod" },
     { name = "numpy" },
     { name = "tqdm" },
 ]
@@ -128,6 +129,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "colorlog", specifier = ">=6.9.0" },
+    { name = "dimod", specifier = ">=0.12.18" },
     { name = "numpy", specifier = ">=2.2.3" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
@@ -327,6 +329,22 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/0f/d5/c66da9b79e5bdb124974bfe172b4daf3c984ebd9c2a06e2b8a4dc7331c72/defusedxml-0.7.1.tar.gz", hash = "sha256:1bb3032db185915b62d7c6209c5a8792be6a32ab2fedacc84e01b52c51aa3e69", size = 75520 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl", hash = "sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61", size = 25604 },
+]
+
+[[package]]
+name = "dimod"
+version = "0.12.18"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/76/c6/984228bc3413fcaa642581afca1e121c4bf505ce73188b59038345923b8b/dimod-0.12.18.tar.gz", hash = "sha256:1ff58655be3e127d359438e6d2f6564954a066eeafaf4de88135dcd4e02843ca", size = 3051622 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7b/72/294233f71065a56831300b3793e7c05122635c8fa52034ee96f8ed81eed4/dimod-0.12.18-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:0e7bbb2dbd320b329c54e4e419452d1f893e813eb2dfcd24d2196eaeae318e3a", size = 5384666 },
+    { url = "https://files.pythonhosted.org/packages/5a/48/47fb9c8d99cc913290f19438fc80b641df850cef19fd8ca8e2e49efc3506/dimod-0.12.18-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:6e0404347471f0051cb128502ba63f1bec5d2e8eba098c986ced316f0c86659d", size = 5170953 },
+    { url = "https://files.pythonhosted.org/packages/d5/7c/49d680257e2feef7009b8c90dcdabfbe7eb7bfc4c87622f9c86b83ef58f6/dimod-0.12.18-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1d8825198f9a6e0f7d18938c812333bb0d7a9f28af3376fdbf250ee0d9d9ad5f", size = 8690613 },
+    { url = "https://files.pythonhosted.org/packages/8b/53/8abf4fa2b687cd98650826489e4a8f5a21229937fb6253a5ff54ac831f80/dimod-0.12.18-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:25ca6445aa54c341a93427f64c7bcf04f9d02823b235396190e1e42dc84ea584", size = 8967578 },
+    { url = "https://files.pythonhosted.org/packages/50/2d/b849de322746bf270668236309228f13d358ff64f73aed4f8a11c1baa325/dimod-0.12.18-cp313-cp313-win_amd64.whl", hash = "sha256:11182d758387241c9aa321d4c771f62a31b4f00a5ba7d13f6f2b90c06ab74b94", size = 5231516 },
 ]
 
 [[package]]
